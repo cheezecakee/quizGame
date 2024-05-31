@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	_ "time"
+	"time"
 )
 
 type Quiz struct {
@@ -14,11 +14,17 @@ type Quiz struct {
 	Answer   string
 }
 
-func askQuestion(q Quiz) bool {
+func quizTimer() {
+	// Customizable with a flag
+	// Request key press to start the quiz and countdown
+	// Quiz stops and outputs the results after the time limit exceeds
+}
+
+func askQuestion(q Quiz, answerCh chan<- bool) {
 	var userAnswer string
 	fmt.Printf("Question: %s\n Your Answer: ", q.Question)
 	fmt.Scanln(&userAnswer)
-	return userAnswer == q.Answer
+	answerCh <- (userAnswer == q.Answer)
 }
 
 func createQuizList(data [][]string) []Quiz {
@@ -64,22 +70,48 @@ func main() {
 
 	quizList := createQuizList(data)
 
-	// fmt.Printf("%+v\n", quizList)
-	// Ask user the questions from the files
-	// Compare user answer with file answer
-	// Keep track of how many questions got correct
-	var score int
-	for _, quiz := range quizList {
-		if askQuestion(quiz) {
-			score++
+	// Start the Quiz
+	var start string
+	fmt.Println("Start Quiz? [Y/N]")
+	fmt.Scanln(&start)
+	if start == "Y" || start == "y" {
+		// Add a timer
+		// Default time limit 30 sec
+		timer := time.NewTimer(30 * time.Second)
+		fmt.Println("Time started!")
+
+		// Channel to receive answers
+		answerCh := make(chan bool)
+		var score int
+
+		// Ask user the questions from the files
+		// Compare user answer with file answer
+		// Keep track of how many questions got correct
+		// Goroutine to ask questions
+		go func() {
+			for _, quiz := range quizList {
+				askQuestion(quiz, answerCh)
+			}
+			close(answerCh)
+		}()
+
+	loop:
+		for {
+			select {
+			case <-timer.C:
+				fmt.Println("Time up!")
+				break loop
+			case correct, ok := <-answerCh:
+				if !ok {
+					break loop
+				}
+				if correct {
+					score++
+				}
+			}
 		}
+		fmt.Printf("You scored %d out of %d.\n", score, len(quizList))
+	} else {
+		fmt.Println("Until next time!")
 	}
-
-	fmt.Printf("You scored %d out of %d.\n", score, len(quizList))
-
-	// Add a timer
-	// Default time limit 30 sec
-	// Customizable with a flag
-	// Request key press to start the quiz and countdown
-	// Quiz stops and outputs the results after the time limit exceeds
 }

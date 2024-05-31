@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/csv"
+	_ "flag"
 	"fmt"
 	"log"
 	"os"
+	_ "time"
 )
 
 type Quiz struct {
@@ -74,4 +76,10 @@ func main() {
 	}
 
 	fmt.Printf("You scored %d out of %d.\n", score, len(quizList))
+
+	// Add a timer
+	// Default time limit 30 sec
+	// Customizable with a flag
+	// Request key press to start the quiz and countdown
+	// Quiz stops and outputs the results after the time limit exceeds
 }

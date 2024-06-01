@@ -1,5 +1,8 @@
 ### Timed Quiz Game
 
+### Requirements
+Go - [Link](https://go.dev/doc/install)
+
 ### Installation
 - Clone the repository
 - Add csv file with the quiz of choice in to src/quiz/internal

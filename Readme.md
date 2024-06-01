@@ -5,8 +5,9 @@
 - Add csv file with the quiz of choice in to src/quiz/internal
 - Run the command in the command line: 
 ```
-go run src/quiz/main.go -time=<seconds>[optional] [CSV file]
+go run src/quiz/main.go -time=<seconds>[optional] -shuffle[optional] [CSV file]
 ```
+- Press "Y" to start the quiz and any other key to exit.
 - Enjoy:)
 
 ### CVS file format

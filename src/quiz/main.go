@@ -5,7 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -14,14 +16,18 @@ type Quiz struct {
 	Answer   string
 }
 
-func quizTimer() {
+func shuffleQuiz(quizList []Quiz) {
+	rand.Shuffle(len(quizList), func(i, j int) {
+		quizList[i], quizList[j] = quizList[j], quizList[i]
+	})
 }
 
 func askQuestion(q Quiz, answerCh chan<- bool) {
 	var userAnswer string
 	fmt.Printf("Question: %s\n Your Answer: ", q.Question)
 	fmt.Scanln(&userAnswer)
-	answerCh <- (userAnswer == q.Answer)
+	trimmedAns := strings.Trim(userAnswer, " ")
+	answerCh <- (strings.ToLower(trimmedAns) == strings.ToLower(q.Answer))
 }
 
 func createQuizList(data [][]string) []Quiz {
@@ -46,14 +52,18 @@ func main() {
 	// Customizable time limit with a flag
 	var timeLimit int
 	flag.IntVar(&timeLimit, "time", 30, "Time limit for the quiz in seconds")
+	// Customizable shuffle the quiz order
+	var shuffle bool
+	flag.BoolVar(&shuffle, "shuffle", false, "Shuffles the quiz order")
 
 	flag.Parse()
 
 	fmt.Println("Time limit set to:", timeLimit)
+	fmt.Println("Shuffle set to:", shuffle)
 
 	// Part 1
 	if len(flag.Args()) < 1 {
-		fmt.Println("How to run quiz:\n\tgo run src/quiz/main.go -time=<seconds>[optional] [CSV file]")
+		fmt.Println("How to run quiz:\n\tgo run src/quiz/main.go -time=<seconds>[optional] -shuffle[optional] -capital[optional] [CSV file]")
 		return
 	}
 
@@ -75,6 +85,10 @@ func main() {
 
 	quizList := createQuizList(data)
 
+	if shuffle {
+		shuffleQuiz(quizList)
+	}
+
 	// Start the Quiz
 	// Request key press to start the quiz and countdown
 	var start string
@@ -95,6 +109,8 @@ func main() {
 		// Keep track of how many questions got correct
 		// Goroutine to ask questions
 		go func() {
+			if shuffle {
+			}
 			for _, quiz := range quizList {
 				askQuestion(quiz, answerCh)
 			}

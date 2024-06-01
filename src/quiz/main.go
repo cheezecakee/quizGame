@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/csv"
-	_ "flag"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -15,9 +15,6 @@ type Quiz struct {
 }
 
 func quizTimer() {
-	// Customizable with a flag
-	// Request key press to start the quiz and countdown
-	// Quiz stops and outputs the results after the time limit exceeds
 }
 
 func askQuestion(q Quiz, answerCh chan<- bool) {
@@ -46,14 +43,22 @@ func createQuizList(data [][]string) []Quiz {
 }
 
 func main() {
+	// Customizable time limit with a flag
+	var timeLimit int
+	flag.IntVar(&timeLimit, "time", 30, "Time limit for the quiz in seconds")
+
+	flag.Parse()
+
+	fmt.Println("Time limit set to:", timeLimit)
+
 	// Part 1
-	if len(os.Args) < 2 {
-		fmt.Println("How to run quiz:\n\tQuizt [problems CSV file]")
+	if len(flag.Args()) < 1 {
+		fmt.Println("How to run quiz:\n\tgo run src/quiz/main.go -time=<seconds>[optional] [CSV file]")
 		return
 	}
 
 	// Open file
-	path := "./src/quiz/internal/" + os.Args[1]
+	path := "./src/quiz/internal/" + flag.Args()[0]
 
 	file, err := os.Open(path)
 	if err != nil {
@@ -71,13 +76,14 @@ func main() {
 	quizList := createQuizList(data)
 
 	// Start the Quiz
+	// Request key press to start the quiz and countdown
 	var start string
 	fmt.Println("Start Quiz? [Y/N]")
 	fmt.Scanln(&start)
 	if start == "Y" || start == "y" {
 		// Add a timer
 		// Default time limit 30 sec
-		timer := time.NewTimer(30 * time.Second)
+		timer := time.NewTimer(time.Duration(timeLimit) * time.Second)
 		fmt.Println("Time started!")
 
 		// Channel to receive answers
@@ -110,6 +116,7 @@ func main() {
 				}
 			}
 		}
+		// Quiz stops and outputs the results after the time limit exceeds
 		fmt.Printf("You scored %d out of %d.\n", score, len(quizList))
 	} else {
 		fmt.Println("Until next time!")

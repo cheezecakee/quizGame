@@ -2,7 +2,7 @@
 
 ### Installation
 - Clone the repository
-- Add csv file with the quiz of choice in to src/quizGame/internal
+- Add csv file with the quiz of choice in to src/quiz/internal
 - Run the command in the command line: 
 ```
 go run src/quiz/main.go -time=<seconds>[optional] [CSV file]
